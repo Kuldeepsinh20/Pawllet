@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream-50: #FDFBF9;
+  --color-cream-100: #FAF7F2;
+  --color-cream-200: #F3ECE1;
+  --color-cream-300: #E9DEC9;
+  --color-cream-400: #DFCEB1;
+
+  --color-pawNavy-900: #141E38;
+  --color-pawNavy-800: #1A2748;
+  --color-pawNavy-700: #22325A;
+  --color-pawNavy-600: #2F4374;
+  --color-pawNavy-500: #3D548F;
+
+  --color-pawGold-50: #FDF9EF;
+  --color-pawGold-100: #FCF3DC;
+  --color-pawGold-200: #F7E4B2;
+  --color-pawGold-300: #EED084;
+  --color-pawGold-400: #E2BA55;
+  --color-pawGold-500: #D4A02A;
+  --color-pawGold-600: #BA861C;
+  --color-pawGold-700: #946614;
+
+  --color-pawMint-50: #F2FAF6;
+  --color-pawMint-100: #E5F5ED;
+  --color-pawMint-200: #D2EDE0;
+  --color-pawMint-300: #B6E1CC;
+  --color-pawMint-500: #2E7D59;
+  --color-pawMint-700: #195339;
+
+  --color-pawLavender-50: #F8F6FD;
+  --color-pawLavender-100: #F0ECFA;
+  --color-pawLavender-200: #E3DAF5;
+  --color-pawLavender-300: #D2C3EE;
+  --color-pawLavender-500: #754EB8;
+  --color-pawLavender-700: #53318E;
+
+  --font-script: "Caveat", "Brush Script MT", "Comic Sans MS", cursive;
+}
+
+:root {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: light;
+}
+
+/* Decorative background pattern of paws and bones */
+.bg-paw-pattern {
+  background-color: #FAF7F2;
+  background-image: url("data:image/svg+xml,%3Csvg width='160' height='160' viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23B8912A' fill-opacity='0.22'%3E%3C!-- Large Paw Print --%3E%3Ccircle cx='38' cy='28' r='5'/%3E%3Ccircle cx='52' cy='23' r='5'/%3E%3Ccircle cx='65' cy='28' r='5'/%3E%3Ccircle cx='30' cy='40' r='4'/%3E%3Cellipse cx='49' cy='50' rx='12' ry='9'/%3E%3C!-- Bone --%3E%3Cg transform='translate(100,18) rotate(38)'%3E%3Crect x='5' y='7' width='22' height='5' rx='2.5'/%3E%3Ccircle cx='5' cy='6' r='4'/%3E%3Ccircle cx='5' cy='14' r='4'/%3E%3Ccircle cx='27' cy='6' r='4'/%3E%3Ccircle cx='27' cy='14' r='4'/%3E%3C/g%3E%3C!-- Small Paw Print (offset) --%3E%3Ccircle cx='112' cy='98' r='3.5'/%3E%3Ccircle cx='122' cy='94' r='3.5'/%3E%3Ccircle cx='131' cy='98' r='3.5'/%3E%3Ccircle cx='106' cy='107' r='3'/%3E%3Cellipse cx='120' cy='115' rx='9' ry='7'/%3E%3C!-- Ball --%3E%3Ccircle cx='22' cy='130' r='9'/%3E%3Cpath d='M16 125 Q22 121 28 125' stroke='%23B8912A' stroke-width='1.5' fill='none' stroke-opacity='0.5'/%3E%3C!-- Dog bowl --%3E%3Cg transform='translate(118,38)'%3E%3Cpath d='M2 16 L22 16 L20 7 L4 7 Z'/%3E%3Cellipse cx='12' cy='7' rx='8' ry='3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Card subtle shadow */
+.shadow-card {
+  box-shadow: 0 4px 24px -2px rgba(44, 30, 10, 0.06);
+}
+
+.shadow-folder {
+  box-shadow: 0 6px 18px -2px rgba(186, 134, 28, 0.18);
+}
+
+/* Print styles for Dossier */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  header, aside, button, .no-print {
+    display: none !important;
+  }
+}
