@@ -9,6 +9,7 @@ from app.models.medication import Medication
 from app.models.food import Food
 from app.models.category import PetCategory
 from app.models.document import Document
+from app.models.admin_user import AdminUser
 
 __all__ = [
     "Base",
@@ -22,4 +23,5 @@ __all__ = [
     "Food",
     "PetCategory",
     "Document",
+    "AdminUser",
 ]

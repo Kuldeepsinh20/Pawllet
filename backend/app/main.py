@@ -1,12 +1,39 @@
 """
 Pawlet FastAPI Application
 """
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
-from app.routers import pets, documents
+from app.core.database import SessionLocal, engine
+from app.core.security import get_password_hash
+from app.models.base import Base
+from app.models.admin_user import AdminUser
+from app.routers import auth, admin, pets, documents
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Ensure tables exist and seed initial admin user if not present
+    try:
+        Base.metadata.create_all(bind=engine)
+        with SessionLocal() as db:
+            existing_admin = db.query(AdminUser).filter(AdminUser.username == settings.ADMIN_USERNAME).first()
+            if not existing_admin:
+                hashed = get_password_hash(settings.ADMIN_PASSWORD)
+                new_admin = AdminUser(
+                    username=settings.ADMIN_USERNAME,
+                    hashed_password=hashed,
+                    is_active=True,
+                )
+                db.add(new_admin)
+                db.commit()
+    except Exception as e:
+        print(f"Warning during startup database initialization: {e}")
+    yield
+
 
 app = FastAPI(
     title="Pawlet API",
@@ -14,6 +41,7 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
@@ -26,6 +54,8 @@ app.add_middleware(
 )
 
 # ── Routers ───────────────────────────────────────────────────────────────────
+app.include_router(auth.router, prefix="/api/v1")
+app.include_router(admin.router, prefix="/api/v1")
 app.include_router(pets.router, prefix="/api/v1")
 app.include_router(documents.router, prefix="/api/v1")
 

@@ -8,6 +8,8 @@ from app.schemas.pet import (
     PetDetailResponse,
     CategoryResponse,
 )
+from app.schemas.auth import LoginRequest, TokenResponse, AdminUserResponse
+from app.schemas.admin import DashboardSummaryResponse, SegmentDataResponse, PaginatedPetsResponse
 
 __all__ = [
     "OwnerCreate",
@@ -20,4 +22,10 @@ __all__ = [
     "PetListItem",
     "PetDetailResponse",
     "CategoryResponse",
+    "LoginRequest",
+    "TokenResponse",
+    "AdminUserResponse",
+    "DashboardSummaryResponse",
+    "SegmentDataResponse",
+    "PaginatedPetsResponse",
 ]
