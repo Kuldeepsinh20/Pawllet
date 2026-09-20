@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -7,6 +8,8 @@ from app.core.security import verify_password, get_password_hash, create_access_
 from app.models.admin_user import AdminUser
 from app.schemas.auth import LoginRequest, TokenResponse, AdminUserResponse
 from app.dependencies.auth import get_current_admin
+
+logger = logging.getLogger("pawlet.auth")
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -31,12 +34,14 @@ def login_admin(data: LoginRequest, db: Session = Depends(get_db)):
             db.refresh(user)
 
     if not user or not user.is_active or not verify_password(data.password, user.hashed_password):
+        logger.warning(f"[AUTH Failed] Invalid login attempt for username: '{username}'")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    logger.info(f"[AUTH Success] Admin user logged in: '{username}'")
     access_token = create_access_token(subject=user.username)
     return TokenResponse(
         access_token=access_token,
