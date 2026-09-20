@@ -3,9 +3,14 @@
  * Connects frontend to FastAPI backend endpoints with JWT Bearer authentication.
  */
 
+const DEFAULT_PROD_API_URL = 'https://pawlet-backend.onrender.com';
+const rawApiUrl = import.meta.env.VITE_API_URL;
 const VITE_API_URL = (
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.PROD ? 'https://pawlet-backend.onrender.com' : 'http://127.0.0.1:8000')
+  import.meta.env.PROD
+    ? (rawApiUrl && !rawApiUrl.includes('localhost') && !rawApiUrl.includes('127.0.0.1')
+        ? rawApiUrl
+        : DEFAULT_PROD_API_URL)
+    : (rawApiUrl || 'http://127.0.0.1:8000')
 ).replace(/\/$/, '');
 const API_BASE = `${VITE_API_URL}/api/v1`;
 

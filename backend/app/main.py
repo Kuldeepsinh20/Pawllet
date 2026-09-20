@@ -1,13 +1,10 @@
 """
 Pawlet FastAPI Application
 """
-import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
-from starlette.middleware.cors import CORSMiddleware
-from starlette.datastructures import Headers
-from starlette.responses import Response, JSONResponse
-from starlette.types import Scope, Receive, Send
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.database import SessionLocal, engine
@@ -15,37 +12,6 @@ from app.core.security import get_password_hash
 from app.models.base import Base
 from app.models.admin_user import AdminUser
 from app.routers import auth, admin, pets, documents
-
-logger = logging.getLogger("pawlet.cors")
-
-
-class LoggingCORSMiddleware(CORSMiddleware):
-    """
-    Enhanced CORS middleware that logs CORS rejections and approvals
-    without exposing passwords, tokens, or credentials.
-    """
-    def preflight_response(self, request_headers: Headers) -> Response:
-        response = super().preflight_response(request_headers)
-        origin = request_headers.get("origin")
-        method = request_headers.get("access-control-request-method")
-        if response.status_code == 400:
-            logger.warning(
-                f"[CORS Preflight Rejected] Origin: '{origin}', Method: '{method}'. "
-                f"Configured origins count: {len(self.allow_origins)}"
-            )
-        else:
-            logger.info(
-                f"[CORS Preflight Approved] Origin: '{origin}', Method: '{method}'"
-            )
-        return response
-
-    async def simple_response(self, scope: Scope, receive: Receive, send: Send, request_headers: Headers) -> None:
-        origin = request_headers.get("origin")
-        if origin and not self.is_allowed_origin(origin):
-            logger.warning(
-                f"[CORS Simple Request Disallowed] Origin: '{origin}' on Path: '{scope.get('path')}', Method: '{scope.get('method')}'"
-            )
-        await super().simple_response(scope, receive, send, request_headers)
 
 
 @asynccontextmanager
@@ -79,17 +45,20 @@ app = FastAPI(
 )
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
-# Explicitly configured origins with regex fallback for vercel deployments,
-# credentials=True with explicit origins (not wildcard origin), and full HTTP method support.
+# Explicit production & local development origins, credentials enabled, standard methods.
 app.add_middleware(
-    LoggingCORSMiddleware,
+    CORSMiddleware,
     allow_origins=settings.cors_origins_list,
-    allow_origin_regex=settings.CORS_ORIGIN_REGEX,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_methods=[
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "PATCH",
+        "OPTIONS",
+    ],
     allow_headers=["*"],
-    expose_headers=["*"],
-    max_age=86400,
 )
 
 # ── Routers ───────────────────────────────────────────────────────────────────

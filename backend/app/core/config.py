@@ -1,22 +1,17 @@
-import json
 import os
-from typing import List, Union
+from typing import List
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+psycopg://postgres:postgres@localhost:5432/pawlet_db"
 
-    # CORS Origins configuration
-    # Can be a comma-separated string, JSON list, or list of strings
-    CORS_ORIGINS: Union[str, List[str]] = (
+    # CORS Origins (comma-separated string or environment variable)
+    CORS_ORIGINS: str = (
         "https://pawlet-inky.vercel.app,"
         "http://localhost:3000,http://localhost:3001,http://localhost:5173,"
         "http://127.0.0.1:3000,http://127.0.0.1:3001,http://127.0.0.1:5173"
     )
-
-    # Regex pattern to match any pawlet vercel deployment (e.g. pawlet-inky.vercel.app, pawlet.vercel.app)
-    CORS_ORIGIN_REGEX: str = r"^https:\/\/(pawlet[a-z0-9-]*\.vercel\.app)$"
 
     UPLOAD_DIR: str = "../storage/uploads"
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10 MB
@@ -33,11 +28,11 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> List[str]:
         """
-        Parses CORS_ORIGINS from string (comma-separated or JSON list) or list,
-        normalizes each URL (stripping whitespace, trailing slashes, surrounding quotes),
-        and guarantees mandatory production origin and local development origins.
+        Returns a normalized, deduplicated list of allowed CORS origins.
+        Guarantees the production origin and local development origins are always present
+        regardless of missing or malformed environment variables.
         """
-        mandatory_origins = [
+        base_origins = [
             "https://pawlet-inky.vercel.app",
             "http://localhost:3000",
             "http://localhost:3001",
@@ -47,33 +42,23 @@ class Settings(BaseSettings):
             "http://127.0.0.1:5173",
         ]
 
-        raw = self.CORS_ORIGINS
-        parsed_entries = []
+        origins = set(base_origins)
+        if self.CORS_ORIGINS:
+            # Normalize brackets, quotes, and whitespace
+            raw_items = (
+                str(self.CORS_ORIGINS)
+                .replace("[", "")
+                .replace("]", "")
+                .replace('"', "")
+                .replace("'", "")
+                .split(",")
+            )
+            for item in raw_items:
+                cleaned = item.strip().rstrip("/")
+                if cleaned:
+                    origins.add(cleaned)
 
-        if isinstance(raw, list):
-            parsed_entries = list(raw)
-        elif isinstance(raw, str):
-            trimmed = raw.strip()
-            if trimmed.startswith("[") and trimmed.endswith("]"):
-                try:
-                    loaded = json.loads(trimmed)
-                    if isinstance(loaded, list):
-                        parsed_entries = [str(item) for item in loaded]
-                except Exception:
-                    parsed_entries = trimmed.strip("[]").split(",")
-            else:
-                parsed_entries = trimmed.split(",")
-
-        normalized: set[str] = set()
-        for item in parsed_entries + mandatory_origins:
-            if not item:
-                continue
-            # Strip whitespace, quotes, and trailing slashes
-            cleaned = str(item).strip().strip("'\"").rstrip("/")
-            if cleaned:
-                normalized.add(cleaned)
-
-        return sorted(list(normalized))
+        return sorted(list(origins))
 
     @property
     def upload_dir_abs(self) -> str:
